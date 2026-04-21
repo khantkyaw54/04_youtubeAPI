@@ -15,12 +15,25 @@
             font-weight: bold;
             cursor: pointer;
         }
+
+        body {
+
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            margin: 20px;
+
+        }
     </style>
 
     <body>
         <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
         <!-- 1. ここの<div>タグがYoutubeの<iframe>に置き換わる。 -->
         <div id="player"></div>
+        <form>
+            <input type="search" id="ytSearch" value="TRiDENT" />
+            <button id="searchBtn">検索</button>
+        </form>
 
         <nav>
             <ul>
@@ -76,7 +89,7 @@
             //    after the API code downloads.
             // 3. APIのコードを読み込んでから、この関数を<iframe>内に影響させる。
             var player;
-            let youtubeId = 'cfaybWG25D4';
+            let youtubeId = 'TPnJYJjo7Sw';
             function onYouTubeIframeAPIReady() {
                 player = new YT.Player('player', {
                     height: '360',
@@ -214,6 +227,7 @@
             let movieid = document.querySelector('#MovieId');
             movieid.addEventListener('change', function () {
                 youtubeId = movieid.value;
+
                 //プレイヤー削除
                 player.destroy();
                 onYouTubeIframeAPIReady();
@@ -235,6 +249,7 @@
             //     playSpeed(parseFloat(speedBtn.speed.value));
             // });
 
+
             function playSpeed(num) {
                 player.setPlaybackRate(num);
             }
@@ -248,6 +263,54 @@
                 let speed = speedBtn.value;
                 speedTxt.textContent = speed;
             })
+
+        </script>
+        <script>
+
+
+            const USE_LOCAL = true; // 開発中はtrue、本番APIを叩きたいときはfalse
+            const selectvideo = document.querySelector(".ytMovie");
+
+
+            const ytSearch = function (val) {
+                const key = 'AIzaSyCccb1ORqXQcldvMwJebN6NC1QqBtRNyaY'; //自分のキーに書き換えます。
+                const num = 10;
+                const part = 'snippet';
+                const type = 'video';
+                const query = val;
+                const apiUrl = `https://www.googleapis.com/youtube/v3/search?type=${type}&part=${part}&maxResults=${num}&key=${key}&q=${query}&playsinline=1`;
+
+                const localUrl = './data/sample.json';
+
+                fetch(USE_LOCAL ? localUrl : apiUrl)
+                    .then((data) => data.json())
+                    .then((obj) => {
+                        for (let movie of obj["items"]) {
+                            //各videoIdとタイトルを取得
+                            console.log(movie["id"]["videoId"]);
+                            console.log(movie["snippet"]["title"]);
+
+                            const ytId = movie["id"]["videoId"];
+                            const ytTitle = movie["snippet"]["title"];
+
+                            selectvideo.innerHTML += `<option value="${ytId}">${ytTitle}</option>`;
+
+                        }
+                    });
+            }
+
+
+            const ytSearchBtn = document.querySelector('#searchBtn');
+
+            ytSearchBtn.addEventListener('click', function (e) {
+                selectvideo.innerHTML = "";
+                const ytSearchVal = document.querySelector('#ytSearch').value;
+                console.log(ytSearchVal); //検索フォームの値を取得
+
+                e.preventDefault(); //検索ボタンの送信をストップしておく。
+                ytSearch(ytSearchVal);
+            });
+
 
         </script>
 
